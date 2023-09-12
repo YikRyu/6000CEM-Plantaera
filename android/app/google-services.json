@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "196237056840",
+    "project_id": "plantaera-98ea9",
+    "storage_bucket": "plantaera-98ea9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:196237056840:android:71dff753e434fa0957717d",
+        "android_client_info": {
+          "package_name": "com.example.plantaera"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCx1wmz_DDaWjbf4YEXyo76wRRTyxMQvq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
