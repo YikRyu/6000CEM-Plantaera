@@ -1,5 +1,5 @@
 name: plantaera
-description: A new Flutter project.
+description: A mobile application that can help you in your gardening journey.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -30,17 +30,32 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  carousel_slider: ^4.2.1
+  google_fonts: ^6.1.0
+  email_validator: ^2.1.17
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  firebase_core: ^2.15.1
+  firebase_core: ^2.17.0
+  image_picker: ^1.0.4
+  cloud_firestore: ^4.9.3
+  firebase_auth: ^4.10.1
+  firebase_storage: ^11.2.8
+
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.12.0"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/plantaera-logo.png"
+  min_sdk_android: 21
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -61,9 +76,13 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    - assets/admin-plant-icon.png
+    - assets/admin-plant-icon-darken.png
+    - assets/plant-icon.png
+    - assets/plant-icon-darken.png
+    - assets/plantaera-logo-removebg.png
+    - assets/plantaera-logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
