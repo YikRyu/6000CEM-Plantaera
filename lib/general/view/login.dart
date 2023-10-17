@@ -3,6 +3,7 @@
 import 'package:plantaera/res/colors.dart';
 import 'package:plantaera/user/view/home/homepage.dart';
 import 'package:plantaera/admin/view/home/homepage.dart';
+import 'package:plantaera/user/widget/user_bottom_nav.dart';
 import 'package:flutter/material.dart';
 import 'package:plantaera/general/view_model/login_viewmodel.dart';
 import 'package:plantaera/general/view/register.dart';
@@ -43,7 +44,7 @@ class _LoginState extends State<Login> {
           .of(context)
           .pushReplacement(
           MaterialPageRoute(
-              builder: (BuildContext context) => UserHomePage()
+              builder: (BuildContext context) => UserBottomNav()
           ));
     }else if (loginStatusText == "ok" && accountRole == "admin"){
       //redirect to admin home page...

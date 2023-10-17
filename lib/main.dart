@@ -1,16 +1,21 @@
 //splash screen reference: https://www.scaler.com/topics/splash-screen-in-flutter/
+//splash screen presist login reference: https://stackoverflow.com/questions/54469191/persist-user-auth-flutter-firebase
+//splash screen presist login reference 2: https://medium.com/@ankith159/flutter-firebase-auth-an-easy-guide-to-persist-user-state-c90c2e53f9df
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:plantaera/res/colors.dart';
-import 'package:plantaera/user/view/home/homepage.dart';
 import 'firebase_options.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+
 import 'general/view/login.dart';
+import 'package:plantaera/user/view/home/homepage.dart';
+import 'package:plantaera/admin/view/home/homepage.dart';
+import 'package:plantaera/general/view_model/login_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +51,13 @@ class Plantaera extends StatelessWidget {
             ),
           ),
         ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: darkGreen,
+          unselectedItemColor: grass,
+          showUnselectedLabels: true,
+          unselectedLabelStyle: const TextStyle(color: grass, fontSize: 11),
+        ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: grass,
         ),
@@ -78,14 +90,60 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? user;
+
+  LoginVM loginVM = LoginVM();
+
   @override
   void initState() {
     super.initState();
-    Timer(
-        const Duration(seconds: 3),
-        () => Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => const Login())));
+    initializeUser(); //check for user instance
+    navigateUser(); //navigate to page accordingly
   }
+
+  Future initializeUser() async {
+    await Firebase.initializeApp();
+    final User? firebaseUser = await FirebaseAuth.instance.currentUser;
+    await firebaseUser?.reload();
+    user = await _auth.currentUser;
+    // get User authentication status here
+  }
+
+  navigateUser() async {
+    if (_auth.currentUser != null) { // if logged in
+      Map<String, dynamic> userRole = await loginVM.getUserInformation(FirebaseAuth.instance.currentUser!.uid);
+
+      if(userRole["role"] == 'user'){
+        Timer(Duration(seconds: 3),
+                () => Navigator
+                .of(context)
+                .pushReplacement(
+                MaterialPageRoute(
+                    builder: (BuildContext context) => UserHomePage()
+                )));
+      }else{
+        Timer(Duration(seconds: 3),
+                () => Navigator
+                .of(context)
+                .pushReplacement(
+                MaterialPageRoute(
+                    builder: (BuildContext context) => AdminHomePage()
+                )));
+      }
+
+    } else {
+      Timer(Duration(seconds: 3),
+              () => Navigator
+                  .of(context)
+                  .pushReplacement(
+                  MaterialPageRoute(
+                      builder: (BuildContext context) => Login()
+                  )));
+    }
+  }
+
+
 
   Widget build(BuildContext context) {
     return Scaffold(

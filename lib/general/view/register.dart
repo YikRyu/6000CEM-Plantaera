@@ -23,7 +23,7 @@ class _RegisterState extends State<Register> {
 
   handleSubmit() async {
     //function for login credential handling before going to firebase auth
-    if (registerFormKey.currentState!.validate() && (_confirmPasswordController == _passwordController)) { //check if anything is empty
+    if (registerFormKey.currentState!.validate() && (_passwordController.text == _confirmPasswordController.text)) { //check if anything is empty
       final username = _usernameController.value.text;
       final email = _emailController.value.text;
       final password = _passwordController.value.text;
@@ -31,7 +31,7 @@ class _RegisterState extends State<Register> {
         _loading = true; //for the loading progress bar
       });
 
-      //registerStatusText = await RegisterVM().register(context, username, email, birthdate, gender, password);
+      registerStatusText = await RegisterVM().register(context, username, email, password);
 
       if (registerStatusText == "ok") {
         //redirect to home page... succ method, might change ltr when have time
@@ -48,7 +48,7 @@ class _RegisterState extends State<Register> {
         });
       }
     }
-    else if(_confirmPasswordController != _passwordController){
+    else if(_confirmPasswordController.text != _passwordController.text){
       setState(() {
         registerStatusText = "Password and Confirm Password are not the same!";
         _loading = false; //for the loading progress bar
