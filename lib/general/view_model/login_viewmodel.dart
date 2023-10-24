@@ -10,7 +10,13 @@ class LoginVM{
         email: email,
         password: password,
       );
-      return "ok";
+      //grab and check for user role
+      Map<String, dynamic> userRole = await getUserInformation(FirebaseAuth.instance.currentUser!.uid);
+      if(userRole["role"] == 'user'){
+        return "user";
+      }else{
+        return "admin";
+      }
     }on FirebaseAuthException catch(e){
       print(e);
       if(e.code == 'user-not-found'){

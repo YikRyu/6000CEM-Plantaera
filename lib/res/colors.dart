@@ -3,6 +3,8 @@ import'package:flutter/material.dart';
 //general
 const background = Color(0xFFE4FFE7);
 const lightgrey = Color(0xFFCDCDCD);
+const darkgrey = Color(0xFF7E7E7E);
+const favorite = Color(0xFFD6004D);
 
 //user
 const darkGreen = Color(0xFF10513A);

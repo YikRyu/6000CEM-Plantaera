@@ -4,7 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:plantaera/admin/widget/admin_bottom_nav.dart';
 import 'package:plantaera/res/colors.dart';
+import 'package:plantaera/user/widget/user_bottom_nav.dart';
 import 'firebase_options.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
@@ -37,6 +39,7 @@ class Plantaera extends StatelessWidget {
       title: 'Plantaera',
       theme: ThemeData(
         scaffoldBackgroundColor: background,
+        textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
         inputDecorationTheme: const InputDecorationTheme(
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
@@ -51,17 +54,9 @@ class Plantaera extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBarTheme: BottomNavigationBarThemeData(
-          backgroundColor: Colors.white,
-          selectedItemColor: darkGreen,
-          unselectedItemColor: grass,
-          showUnselectedLabels: true,
-          unselectedLabelStyle: const TextStyle(color: grass, fontSize: 11),
-        ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: grass,
         ),
-        textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
         useMaterial3: true,
       ),
       home: StreamBuilder<User?>(
@@ -120,7 +115,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 .of(context)
                 .pushReplacement(
                 MaterialPageRoute(
-                    builder: (BuildContext context) => UserHomePage()
+                    builder: (BuildContext context) => UserBottomNav()
                 )));
       }else{
         Timer(Duration(seconds: 3),
@@ -128,7 +123,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 .of(context)
                 .pushReplacement(
                 MaterialPageRoute(
-                    builder: (BuildContext context) => AdminHomePage()
+                    builder: (BuildContext context) => AdminBottomNav()
                 )));
       }
 

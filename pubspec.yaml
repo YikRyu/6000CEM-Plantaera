@@ -33,6 +33,8 @@ dependencies:
   carousel_slider: ^4.2.1
   google_fonts: ^6.1.0
   email_validator: ^2.1.17
+  shared_preferences: ^2.2.2
+  dotted_border: ^2.1.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -83,6 +85,10 @@ flutter:
     - assets/plant-icon-darken.png
     - assets/plantaera-logo-removebg.png
     - assets/plantaera-logo.png
+    - assets/admin-banner.jpg
+    - assets/gardening-guide-banner.jpg
+    - assets/identification-disease-bg.jpg
+    - assets/identification-plant-bg.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
