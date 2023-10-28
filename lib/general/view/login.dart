@@ -216,11 +216,14 @@ class _LoginState extends State<Login> {
                         const SizedBox(
                           height: 40,
                         ),
-                        Text(
-                          loginStatusText,
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.red,
+                        Center(
+                          child: Text(
+                            loginStatusText,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Colors.red,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),//text for warning if has error during login
                         SizedBox(

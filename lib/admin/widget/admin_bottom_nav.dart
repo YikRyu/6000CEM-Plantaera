@@ -4,28 +4,30 @@
 //bottom nav change screen: https://www.youtube.com/watch?v=xoKqQjSDZ60
 //change theme for admin sided: https://www.educative.io/answers/how-to-create-different-themes-for-your-flutter-app
 //prevent back button from screwing the screens: https://stackoverflow.com/questions/45916658/how-to-deactivate-or-override-the-android-back-button-in-flutter
+//provider reference for page changes: https://www.youtube.com/watch?v=L_QMsE2v6dw
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:plantaera/res/colors.dart';
+import 'package:provider/provider.dart';
 
 import 'package:plantaera/admin/view/admin_management/admin_list.dart';
 import 'package:plantaera/admin/view/disease_guides/disease_guides_list.dart';
 import 'package:plantaera/admin/view/general_guides/general_guides_lists.dart';
 import 'package:plantaera/admin/view/plant_guides/plant_guides_list.dart';
 import 'package:plantaera/admin/view/home/homepage.dart';
-
+import 'package:plantaera/admin/widget/admin_nav_provider.dart';
 
 class AdminBottomNav extends StatefulWidget {
   const AdminBottomNav({Key? key}) : super(key: key);
 
   @override
   State<AdminBottomNav> createState() => _AdminBottomNavState();
+
+
 }
 
 class _AdminBottomNavState extends State<AdminBottomNav> {
-  int navIndex = 0;
-
   final screens = [
     AdminHomePage(),
     AdminPlantGuidesList(),
@@ -33,6 +35,7 @@ class _AdminBottomNavState extends State<AdminBottomNav> {
     AdminGeneralGuidesList(),
     AdminList(),
   ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +67,7 @@ class _AdminBottomNavState extends State<AdminBottomNav> {
         ),
         home: Scaffold(
           body: IndexedStack(
-            index: navIndex,
+            index: context.watch<AdminNavProvider>().navIndex,
             children: screens,
           ),
           bottomNavigationBar: BottomNavigationBar(
@@ -74,9 +77,9 @@ class _AdminBottomNavState extends State<AdminBottomNav> {
             unselectedItemColor: pink,
             showUnselectedLabels: true,
             unselectedLabelStyle: const TextStyle(color: pink, fontSize: 11),
-            currentIndex: navIndex,
+            currentIndex: context.watch<AdminNavProvider>().navIndex,
             onTap: (value) {
-              setState(() {navIndex = value;});
+              setState(() {context.read<AdminNavProvider>().changeOnNav(value);});
             },
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(

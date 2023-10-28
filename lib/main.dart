@@ -1,6 +1,7 @@
 //splash screen reference: https://www.scaler.com/topics/splash-screen-in-flutter/
 //splash screen presist login reference: https://stackoverflow.com/questions/54469191/persist-user-auth-flutter-firebase
 //splash screen presist login reference 2: https://medium.com/@ankith159/flutter-firebase-auth-an-easy-guide-to-persist-user-state-c90c2e53f9df
+//provider reference for page changes: https://www.youtube.com/watch?v=L_QMsE2v6dw
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,12 +13,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:provider/provider.dart';
 
 import 'general/view/login.dart';
-import 'package:plantaera/user/view/home/homepage.dart';
-import 'package:plantaera/admin/view/home/homepage.dart';
 import 'package:plantaera/general/view_model/login_viewmodel.dart';
+import 'package:plantaera/admin/widget/admin_nav_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +25,14 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(const Plantaera());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AdminNavProvider()),
+      ],
+      child: Plantaera(),
+    ),
+  );
 }
 
 class Plantaera extends StatelessWidget {
@@ -64,7 +71,7 @@ class Plantaera extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return UserHomePage();
+            return UserBottomNav();
           } else {
             return const Login();
           }
@@ -106,39 +113,30 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   navigateUser() async {
-    if (_auth.currentUser != null) { // if logged in
-      Map<String, dynamic> userRole = await loginVM.getUserInformation(FirebaseAuth.instance.currentUser!.uid);
+    if (_auth.currentUser != null) {
+      // if logged in
+      Map<String, dynamic> userRole = await loginVM
+          .getUserInformation(FirebaseAuth.instance.currentUser!.uid);
 
-      if(userRole["role"] == 'user'){
-        Timer(Duration(seconds: 3),
-                () => Navigator
-                .of(context)
-                .pushReplacement(
-                MaterialPageRoute(
-                    builder: (BuildContext context) => UserBottomNav()
-                )));
-      }else{
-        Timer(Duration(seconds: 3),
-                () => Navigator
-                .of(context)
-                .pushReplacement(
-                MaterialPageRoute(
-                    builder: (BuildContext context) => AdminBottomNav()
+      if (userRole["role"] == 'user') {
+        Timer(
+            Duration(seconds: 3),
+            () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (BuildContext context) => UserBottomNav())));
+      } else {
+        Timer(
+            Duration(seconds: 3),
+            () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (BuildContext context) => AdminBottomNav(),
                 )));
       }
-
     } else {
-      Timer(Duration(seconds: 3),
-              () => Navigator
-                  .of(context)
-                  .pushReplacement(
-                  MaterialPageRoute(
-                      builder: (BuildContext context) => Login()
-                  )));
+      Timer(
+          Duration(seconds: 3),
+          () => Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (BuildContext context) => Login())));
     }
   }
-
-
 
   Widget build(BuildContext context) {
     return Scaffold(

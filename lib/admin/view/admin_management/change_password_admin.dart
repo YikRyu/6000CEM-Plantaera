@@ -1,38 +1,36 @@
-import 'package:flutter/material.dart';
-import 'package:plantaera/res/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:plantaera/admin/view_model/admin_viewmodel.dart';
+import 'package:plantaera/res/colors.dart';
 
-import '../../view_model/profile_viewmodel.dart';
-
-class ChangeUserPassword extends StatefulWidget {
-  const ChangeUserPassword({Key? key}) : super(key: key);
+class ChangeAdminPassword extends StatefulWidget {
+  const ChangeAdminPassword({Key? key}) : super(key: key);
 
   @override
-  State<ChangeUserPassword> createState() => _ChangeUserPasswordState();
+  State<ChangeAdminPassword> createState() => _ChangeAdminPasswordState();
 }
 
-class _ChangeUserPasswordState extends State<ChangeUserPassword> {
-  final changeUserPasswordFormKey = GlobalKey<FormState>();
+class _ChangeAdminPasswordState extends State<ChangeAdminPassword> {
+  final changeAdminPasswordFormKey = GlobalKey<FormState>();
   final TextEditingController _oldPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _loading = false;
-  String currentUserID = FirebaseAuth.instance.currentUser!.uid;
-  String? currentUserEmail = FirebaseAuth.instance.currentUser!.email;
-  ProfileVM profileVM = ProfileVM();
+  String adminEmail = '';
+  AdminVM adminVM = AdminVM();
   String changePasswordStatusText = '';
   RegExp regex = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
 
   changePassword() async{
-    if (changeUserPasswordFormKey.currentState!.validate() && (_confirmPasswordController.text == _newPasswordController.text)) { //check if anything is empty
+    if (changeAdminPasswordFormKey.currentState!.validate() && (_confirmPasswordController.text == _newPasswordController.text)) { //check if anything is empty
       final oldPassword = _oldPasswordController.value.text;
       final newPassword = _newPasswordController.value.text;
       setState(() {
         _loading = true; //for the loading progress bar
       });
 
-      changePasswordStatusText = await ProfileVM().changeUserPassword(currentUserEmail!, oldPassword, newPassword);
+      changePasswordStatusText = await AdminVM().changeAdminPassword(adminEmail, oldPassword, newPassword);
 
       if (changePasswordStatusText == "ok") {
         setState(() {
@@ -66,6 +64,10 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
 
   @override
   Widget build(BuildContext context) {
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+    //fetch arguments passed from previous page
+    adminEmail = arguments['email']!;
+
     return Container(
       child: Scaffold(
         appBar: AppBar(
@@ -75,7 +77,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new_rounded,
-              color: darkGreen,
+              color: deepPink,
               size: 35,
             ),
             onPressed: () {
@@ -88,7 +90,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
             child: Stack(
               children: [
                 Form(
-                  key: changeUserPasswordFormKey,
+                  key: changeAdminPasswordFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -97,12 +99,39 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                           "Change Password",
                           style: TextStyle(
                             fontSize: 30,
-                            color: darkGreen,
+                            color: deepPink,
                           ),
                         ),
                       ),
                       SizedBox(
                         height: 30,
+                      ),
+                      Center(
+                        child: Container(
+                          width: 300,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Email:   ",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 200,
+                                child: Text(
+                                  '$adminEmail',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    color: cherry,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       SizedBox(
                         height: 30,
@@ -134,7 +163,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                color: darkGreen,
+                                color: deepPink,
                                 width: 1.0,
                                 style: BorderStyle.none,
                               ),
@@ -174,7 +203,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                color: darkGreen,
+                                color: deepPink,
                                 width: 1.0,
                                 style: BorderStyle.none,
                               ),
@@ -211,7 +240,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                             ),
                             border: OutlineInputBorder(
                               borderSide: const BorderSide(
-                                color: darkGreen,
+                                color: deepPink,
                                 width: 1.0,
                                 style: BorderStyle.none,
                               ),
@@ -232,10 +261,10 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                         width: 250,
                         height: 50,
                         child: ElevatedButton(
-                          //sign in button
+                          //change password button
                           onPressed: () => changePassword(),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: grass,
+                            backgroundColor: cherry,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(7),
                             ),
@@ -245,9 +274,9 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                             child: _loading
                                 ? const SizedBox(
                               width: 50,
-                              height: 50,
+                              height:44,
                               child: CircularProgressIndicator(
-                                color: pastelGreen,
+                                color: pastelPink,
                                 strokeWidth: 2,
                               ),
                             )

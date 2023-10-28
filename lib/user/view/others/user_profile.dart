@@ -95,48 +95,56 @@ class _UserProfileState extends State<UserProfile> {
                           //if able to fetch data, display
                           return SizedBox(
                             width: 300,
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Email:   ",
-                                      style: TextStyle(
-                                        fontSize: 22,
+                            child: Center(
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Email:   ",
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      '$email',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        color: grass,
+                                      SizedBox(
+                                        width: 200,
+                                        child: Text(
+                                          '$email',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            color: grass,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Username:   ",
-                                      style: TextStyle(
-                                        fontSize: 22,
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Username:   ",
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      '$username',
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                        color: grass,
+                                      SizedBox(
+                                        width: 180,
+                                        child: Text(
+                                          '$username',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            color: grass,
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         }),

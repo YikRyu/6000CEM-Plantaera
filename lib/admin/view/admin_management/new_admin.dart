@@ -1,66 +1,76 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:plantaera/admin/view_model/admin_viewmodel.dart';
 import 'package:plantaera/res/colors.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../view_model/profile_viewmodel.dart';
-
-class ChangeUserPassword extends StatefulWidget {
-  const ChangeUserPassword({Key? key}) : super(key: key);
+class NewAdmin extends StatefulWidget {
+  const NewAdmin({Key? key}) : super(key: key);
 
   @override
-  State<ChangeUserPassword> createState() => _ChangeUserPasswordState();
+  State<NewAdmin> createState() => _NewAdminState();
 }
 
-class _ChangeUserPasswordState extends State<ChangeUserPassword> {
-  final changeUserPasswordFormKey = GlobalKey<FormState>();
-  final TextEditingController _oldPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+class _NewAdminState extends State<NewAdmin> {
+  final newAdminFormKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _loading = false;
-  String currentUserID = FirebaseAuth.instance.currentUser!.uid;
-  String? currentUserEmail = FirebaseAuth.instance.currentUser!.email;
-  ProfileVM profileVM = ProfileVM();
-  String changePasswordStatusText = '';
-  RegExp regex = RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+  AdminVM adminVM = AdminVM();
+  String newAdminStatusText = '';
+  RegExp regex =
+      RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
 
-  changePassword() async{
-    if (changeUserPasswordFormKey.currentState!.validate() && (_confirmPasswordController.text == _newPasswordController.text)) { //check if anything is empty
-      final oldPassword = _oldPasswordController.value.text;
-      final newPassword = _newPasswordController.value.text;
+  handleSubmit() async {
+    //function for login credential handling before going to firebase auth
+    if (newAdminFormKey.currentState!.validate() &&
+        (_passwordController.text == _confirmPasswordController.text)) {
+      //check if anything is empty
+      final username = _emailController.value.text;
+      final email = _emailController.value.text;
+      final password = _passwordController.value.text;
       setState(() {
         _loading = true; //for the loading progress bar
       });
 
-      changePasswordStatusText = await ProfileVM().changeUserPassword(currentUserEmail!, oldPassword, newPassword);
+      newAdminStatusText =
+          await adminVM.newAdmin(context, username, email, password);
 
-      if (changePasswordStatusText == "ok") {
-        setState(() {
-          changePasswordStatusText = 'Password changed successfully!';
-          _oldPasswordController.clear();
-          _newPasswordController.clear();
-          _confirmPasswordController.clear();
-        });
+      if (newAdminStatusText == "ok") {
+        //redirect back to admin list with toaster message shown
+        Fluttertoast.showToast(
+          msg: "Admin added successfully! Redirecting back to Admin list....",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        Navigator.pop(context);
         _loading = false;
-      }
-      else{
+      } else {
         setState(() {
-          changePasswordStatusText;
-          _loading = false;
+          _loading = false; //for the loading progress bar
         });
       }
-    }
-    else if(_confirmPasswordController.text != _newPasswordController.text){
+    } else if (_confirmPasswordController.text != _passwordController.text) {
       setState(() {
-        changePasswordStatusText = "Confirm password and password are not the same!";
+        newAdminStatusText = "Password and Confirm Password are not the same!";
+        _loading = false; //for the loading progress bar
+      });
+      return;
+    } else if (!newAdminFormKey.currentState!.validate()) {
+      setState(() {
+        newAdminStatusText = "Please insert all fields!";
         _loading = false;
       });
-    }
-    else{
+    } else {
       setState(() {
-        changePasswordStatusText = "Please enter password with at least 8 characters, 1 upper and lower case, 1 number, and 1 special character(!@#\$&*~).";
-        _loading = false;
+        newAdminStatusText =
+            "Please enter password with at least 8 characters, 1 upper and lower case, 1 number, and 1 special character(!@#\$&*~).";
+        _loading = false; //for the loading progress bar
       });
+      return;
     }
   }
 
@@ -75,7 +85,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new_rounded,
-              color: darkGreen,
+              color: deepPink,
               size: 35,
             ),
             onPressed: () {
@@ -88,16 +98,16 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
             child: Stack(
               children: [
                 Form(
-                  key: changeUserPasswordFormKey,
+                  key: newAdminFormKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Center(
                         child: Text(
-                          "Change Password",
+                          "New Admin",
                           style: TextStyle(
                             fontSize: 30,
-                            color: darkGreen,
+                            color: deepPink,
                           ),
                         ),
                       ),
@@ -111,13 +121,15 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                         width: 300,
                         child: TextFormField(
                           textAlign: TextAlign.center,
-                          controller: _oldPasswordController,
+                          controller: _emailController,
                           enableSuggestions: false,
                           autocorrect: false,
-                          obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter old password';
+                              return 'Please enter an email';
+                            } else if (EmailValidator.validate(value) ==
+                                false) {
+                              return 'please enter a valid email';
                             }
                             return null;
                           },
@@ -127,7 +139,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            hintText: "Enter old password",
+                            hintText: "Enter new admin email",
                             hintStyle: const TextStyle(
                               fontSize: 17,
                               color: lightgrey,
@@ -142,21 +154,22 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                             ),
                           ),
                         ),
-                      ), // old password textfield
-                      SizedBox(height: 10,),
+                      ), // admin email textfield
+                      SizedBox(
+                        height: 10,
+                      ),
                       SizedBox(
                         width: 300,
                         child: TextFormField(
                           textAlign: TextAlign.center,
-                          controller: _newPasswordController,
+                          controller: _passwordController,
                           enableSuggestions: false,
                           autocorrect: false,
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter new password';
-                            }
-                            else if(!regex.hasMatch(value)){
+                              return 'Please enter admin password';
+                            } else if (!regex.hasMatch(value)) {
                               return 'Password is too weak!';
                             }
                             return null;
@@ -167,7 +180,7 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            hintText: "Enter new password",
+                            hintText: "Enter new admin password",
                             hintStyle: const TextStyle(
                               fontSize: 17,
                               color: lightgrey,
@@ -182,8 +195,10 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                             ),
                           ),
                         ),
-                      ), //new password textfield
-                      SizedBox(height: 10,),
+                      ), //password textfield
+                      SizedBox(
+                        height: 10,
+                      ),
                       SizedBox(
                         width: 300,
                         child: TextFormField(
@@ -225,17 +240,25 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(changePasswordStatusText,style: TextStyle(fontSize: 18, ),textAlign: TextAlign.center,),
+                        child: Text(
+                          newAdminStatusText,
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      SizedBox(height: 10,),
+                      SizedBox(
+                        height: 10,
+                      ),
                       SizedBox(
                         width: 250,
                         height: 50,
                         child: ElevatedButton(
                           //sign in button
-                          onPressed: () => changePassword(),
+                          onPressed: () => handleSubmit(),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: grass,
+                            backgroundColor: cherry,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(7),
                             ),
@@ -244,20 +267,20 @@ class _ChangeUserPasswordState extends State<ChangeUserPassword> {
                           child: Center(
                             child: _loading
                                 ? const SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: CircularProgressIndicator(
-                                color: pastelGreen,
-                                strokeWidth: 2,
-                              ),
-                            )
+                                    width: 50,
+                                    height: 50,
+                                    child: CircularProgressIndicator(
+                                      color: pastelPink,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
                                 : const Text(
-                              "Change Password",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
+                                    "New Admin",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
                           ),
                         ),
                       ), //change username button
