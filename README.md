@@ -1,16 +1,21 @@
-# plantaera
+# Plantaera - An Application that can Help You in Your Plant Taking Journey
 
-A new Flutter project.
+This project is created for Final Year Project study, and the features available in the application will be:
+- User Sided
+1. Login & Register
+2. Homepage
+3. Identify Plant or Disease
+4. Reminders
+5. User Profile
+6. Favorites
 
-## Getting Started
+- Admin Sided
+1. Login
+2. Homepage
+3. Add New Guide
+4. Guide Details
+5. Edit Guide
+6. Delete Guide
+7. Admin Management
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The framework that used to build the application is Flutter and the framework used for developing the plant and disease classification models are Keras and TensorFlow. 
