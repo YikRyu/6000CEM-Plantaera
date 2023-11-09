@@ -19,3 +19,7 @@ This project is created for Final Year Project study, and the features available
 7. Admin Management
 
 The framework that used to build the application is Flutter and the framework used for developing the plant and disease classification models are Keras and TensorFlow. 
+
+The codes for both of the models ae as below:
+1. Plant Classification Model: https://colab.research.google.com/drive/11NKctNvmIagsc3SmXkAu7T8CgoUhlEUp 
+2. Disease Classification Model: https://colab.research.google.com/drive/1Tj4dwenbJkTMSwMQod7HQlaiGJE4cI0L 
