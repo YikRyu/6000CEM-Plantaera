@@ -1,7 +1,9 @@
 class Plants {
   final String id;
   final String name;
+  final String nameLowerCase;
   final String scientificName;
+  final String scientificLowerCase;
   final String description;
   final String plantType;
   final String lifespan;
@@ -16,14 +18,16 @@ class Plants {
   final String harvestTime;
   final String disease;
   final String cover;
-  final List<String> favorites;
+  final List<String> favorite;
 
 
 
   Plants({
     required this.id,
     required this.name,
+    required this.nameLowerCase,
     required this.scientificName,
+    required this.scientificLowerCase,
     required this.description,
     required this.plantType,
     required this.lifespan,
@@ -38,30 +42,7 @@ class Plants {
     required this.harvestTime,
     required this.disease,
     required this.cover,
-    required this.favorites,
+    required this.favorite,
   });
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name' : name,
-    'nameSmallCase' : name.toLowerCase(),
-    'scientificName' : scientificName,
-    'scientificSmallCase' : scientificName.toLowerCase(),
-    'description' : description,
-    'plantType' :plantType,
-    'lifespan' : lifespan,
-    'bloomTime' : bloomTime,
-    'habitat' :habitat,
-    'difficulty' :difficulty,
-    'sunlight' : sunlight,
-    'soil' : soil,
-    'water' : water,
-    'fertilize' :fertilize,
-    'platingTime' : plantingTime,
-    'harvestTime' : harvestTime,
-    'disease' : disease,
-    'cover' : cover,
-    'favorites': [],
-  };
 
 }

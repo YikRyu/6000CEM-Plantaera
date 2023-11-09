@@ -15,14 +15,14 @@ class _NewAdminState extends State<NewAdmin> {
   final newAdminFormKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _loading = false;
   AdminVM adminVM = AdminVM();
   String newAdminStatusText = '';
   RegExp regex =
       RegExp(r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[!@#\$&*~]).{8,}$');
+
 
   handleSubmit() async {
     //function for login credential handling before going to firebase auth

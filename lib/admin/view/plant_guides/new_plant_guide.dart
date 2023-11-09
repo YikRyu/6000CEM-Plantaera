@@ -1,10 +1,16 @@
 //scrollable row reference: https://stackoverflow.com/questions/46222788/how-to-create-a-row-of-scrollable-text-boxes-or-widgets-in-flutter-inside-a-list
+// multi image picker ref: https://www.youtube.com/watch?v=S5qitqOTZu8
+// stack ref: https://api.flutter.dev/flutter/widgets/Stack-class.html
+// assign value to textfieldcontroller ref: https://stackoverflow.com/questions/68410769/how-to-change-textfield-value-from-state-in-flutter
 
 import 'dart:io';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:plantaera/admin/view_model/admin_plant_viewmodel.dart';
 import 'package:plantaera/res/colors.dart';
+import 'package:image_picker/image_picker.dart';
 
 class NewPlantGuide extends StatefulWidget {
   const NewPlantGuide({Key? key}) : super(key: key);
@@ -15,14 +21,13 @@ class NewPlantGuide extends StatefulWidget {
 
 class _NewPlantGuideState extends State<NewPlantGuide> {
   final newPlantFormKey = GlobalKey<FormState>();
-  String? coverPath;
 
   //general fields
   TextEditingController _plantNameController = TextEditingController();
   TextEditingController _scientificNameController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
-  String? plantCover;
-  String? plantGallery;
+  XFile? plantCover;
+  List<XFile> plantGallery = [];
   //characteristics fields
   TextEditingController _plantTypeController = TextEditingController();
   TextEditingController _lifespanController = TextEditingController();
@@ -40,6 +45,103 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
 
   bool _loading = false;
   String newPlantStateMessage = '';
+  AdminPlantVM plantVM = AdminPlantVM();
+
+  //Function for plant cover image picker
+  Future<XFile?> plantCoverPicker() async {
+    return await ImagePicker().pickImage(source: ImageSource.gallery);
+  }
+
+  //Function for gallery image picker
+  Future<List<XFile>> galleryImagePicker() async {
+    List<XFile>? _gallery = await ImagePicker().pickMultiImage();
+
+    if (_gallery.length != 0 && _gallery.isNotEmpty) {
+      return _gallery;
+    }
+    return [];
+  }
+
+  //function for new plant
+  handleSubmit() async {
+    if (newPlantFormKey.currentState!.validate() &&
+        plantCover != null && plantGallery.length != 0) {
+      final plantName = _plantNameController.value.text;
+      final plantNameLowercase = plantName.toLowerCase();
+      final scientificName = _scientificNameController.value.text;
+      final scientificLowerCase = scientificName.toLowerCase();
+      final description = _descriptionController.value.text;
+      final plantType = _plantTypeController.value.text;
+      final lifespan = _lifespanController.value.text;
+      final bloom = _bloomTimeController.value.text;
+      final habitat = _habitatController.value.text;
+      final difficulty = _difficultyController.value.text;
+      final sunlight = _sunlightController.value.text;
+      final soil = _soilController.value.text;
+      final water = _waterController.value.text;
+      final fertilize = _fertilizeController.value.text;
+      final plantingTime = _plantingTimeController.value.text;
+      final harvestTime = _harvestTimeController.value.text;
+      final disease = _diseaseController.value.text;
+
+      //call the function in VM to add data into db
+      newPlantStateMessage = await plantVM.addPlantToDB(
+          plantName,
+          plantNameLowercase,
+          scientificName,
+          scientificLowerCase,
+          description,
+          plantType,
+          lifespan,
+          bloom,
+          habitat,
+          difficulty,
+          sunlight,
+          soil,
+          water,
+          fertilize,
+          plantingTime,
+          harvestTime,
+          disease,
+          plantCover!,
+          plantGallery);
+
+      if (newPlantStateMessage == "ok") {
+        //redirect back to admin list with toaster message shown
+        Fluttertoast.showToast(
+          msg:
+              "New plant added successfully! Redirecting back to previous page....",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        setState(() {
+          _loading = false;
+        });
+        Navigator.pop(context);
+        _loading = false;
+      } else {
+        setState(() {
+          _loading = false; //for the loading progress bar
+        });
+      }
+    } else if (plantCover == null) {
+      setState(() {
+        _loading = false;
+      });
+      return newPlantStateMessage = "Please insert plant cover!";
+    }
+    else if (plantGallery.length == 0) {
+      setState(() {
+        _loading = false;
+      });
+      return newPlantStateMessage = "Please insert at least one picture into gallery!";
+    }else {
+      setState(() {
+        _loading = false;
+      });
+      return newPlantStateMessage = "Please insert all fields";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +204,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                 filled: true,
                                 fillColor: Colors.white,
                                 hintText: "Enter plant name",
+                                contentPadding: EdgeInsets.all(8),
                                 hintStyle: const TextStyle(
                                   fontSize: 17,
                                   color: lightgrey,
@@ -157,6 +260,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                 filled: true,
                                 fillColor: Colors.white,
                                 hintText: "Enter plant scientific name",
+                                contentPadding: EdgeInsets.all(8),
                                 hintStyle: const TextStyle(
                                   fontSize: 17,
                                   color: lightgrey,
@@ -192,79 +296,95 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                               textAlign: TextAlign.center,
                             ),
                           ),
-                          coverPath == null
-                              ? DottedBorder(
-                                borderType: BorderType.RRect,
-                                color: darkgrey,
-                                strokeWidth: 4.0,
-                                dashPattern: [6],
-                                radius: Radius.circular(10.0),
-                                child: Container(
-                                  width: 150,
-                                  height: 120,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Row(
+                          plantCover == null
+                              ? InkWell(
+                                  onTap: () async{
+                                    plantCover = await plantCoverPicker();
+                                    setState(() {
+                                    });
+                                  },
+                                  child: DottedBorder(
+                                    borderType: BorderType.RRect,
+                                    color: darkgrey,
+                                    strokeWidth: 4.0,
+                                    dashPattern: [6],
+                                    radius: Radius.circular(10.0),
+                                    child: Container(
+                                      width: 150,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(10,),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
                                           children: [
-                                            DottedBorder(
-                                              borderType: BorderType.RRect,
-                                              color: darkgrey,
-                                              strokeWidth: 2.0,
-                                              dashPattern: [5],
-                                              radius: Radius.circular(10.0),
-                                              child: Container(
-                                                height: 40,
-                                                width: 40,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: Icon(
-                                                  Icons.add,
-                                                  size: 35,
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                DottedBorder(
+                                                  borderType: BorderType.RRect,
                                                   color: darkgrey,
+                                                  strokeWidth: 2.0,
+                                                  dashPattern: [5],
+                                                  radius: Radius.circular(50.0),
+                                                  child: Container(
+                                                    height: 40,
+                                                    width: 40,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.grey,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.add,
+                                                      size: 35,
+                                                      color: darkgrey,
+                                                    ),
+                                                  ),
                                                 ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10.0,
+                                            ), //spacing
+                                            Center(
+                                              child: Text(
+                                                "Add Plant Cover",
+                                                style: TextStyle(
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                                textAlign: TextAlign.center,
                                               ),
                                             ),
                                           ],
                                         ),
-                                        SizedBox(
-                                          height: 10.0,
-                                        ), //spacing
-                                        Center(
-                                          child: Text(
-                                            "Add Plant Cover",
-                                            style: TextStyle(
-                                              fontSize: 18.0,
-                                              color: Colors.black,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              )
-                              : Container(
-                                  width: double.infinity,
-                                  height: 150,
-                                  decoration: BoxDecoration(
+                                )
+                              : InkWell(
+                                  onTap: () async{
+                                      plantCover = await plantCoverPicker();
+                                      setState(() {
+                                      });
+                                  },
+                                  child: Container(
+                                    width: 150,
+                                    height: 120,
+                                    decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10.0),
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
-                                        image: FileImage(
-                                            File(coverPath as String)),
-                                      )),
+                                        image:
+                                            FileImage(File(plantCover!.path)),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                         ],
                       ), //cover container
@@ -311,69 +431,165 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                 children: [
                                   Align(
                                     alignment: Alignment.centerLeft,
-                                    child: DottedBorder(
-                                      borderType: BorderType.RRect,
-                                      color: darkgrey,
-                                      strokeWidth: 4.0,
-                                      dashPattern: [6],
-                                      radius: Radius.circular(10.0),
-                                      child: Container(
-                                        width: 150,
-                                        height: 120,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  DottedBorder(
-                                                    borderType: BorderType.RRect,
-                                                    color: darkgrey,
-                                                    strokeWidth: 2.0,
-                                                    dashPattern: [5],
-                                                    radius: Radius.circular(10.0),
-                                                    child: Container(
-                                                      height: 40,
-                                                      width: 40,
-                                                      decoration: BoxDecoration(
-                                                        color: Colors.black,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        Icons.add,
-                                                        size: 35,
-                                                        color: darkgrey,
+                                    child: InkWell(
+                                      onTap: () async {
+                                        List<XFile>? plantGalleryList =
+                                            await galleryImagePicker();
+                                        if (plantGalleryList.isNotEmpty) {
+                                          for(XFile _imageList in plantGalleryList){
+                                            plantGallery.add(_imageList);
+                                          }
+                                          setState(() {});
+                                        }
+                                      },
+                                      child: DottedBorder(
+                                        borderType: BorderType.RRect,
+                                        color: darkgrey,
+                                        strokeWidth: 4.0,
+                                        dashPattern: [5],
+                                        radius: Radius.circular(10.0),
+                                        child: Container(
+                                          width: 120,
+                                          height: 120,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(10,),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    DottedBorder(
+                                                      borderType:
+                                                          BorderType.RRect,
+                                                      color: darkgrey,
+                                                      strokeWidth: 2.0,
+                                                      dashPattern: [5],
+                                                      radius:
+                                                          Radius.circular(50.0),
+                                                      child: Container(
+                                                        height: 40,
+                                                        width: 40,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.grey,
+                                                          shape:
+                                                              BoxShape.circle,
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.add,
+                                                          size: 35,
+                                                          color: darkgrey,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                height: 10.0,
-                                              ), //spacing
-                                              Center(
-                                                child: Text(
-                                                  "Add Plant Cover",
-                                                  style: TextStyle(
-                                                    fontSize: 18.0,
-                                                    color: Colors.black,
-                                                  ),
-                                                  textAlign: TextAlign.center,
+                                                  ],
                                                 ),
-                                              ),
-                                            ],
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ), //spacing
+                                                Center(
+                                                  child: Text(
+                                                    "Add Plant Picture",
+                                                    style: TextStyle(
+                                                      fontSize: 18.0,
+                                                      color: Colors.black,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
+                                  SizedBox(width: 10,),
+                                  plantGallery.length != 0 &&
+                                          plantGallery.isNotEmpty
+                                      ? Wrap(
+                                    alignment: WrapAlignment.spaceBetween,
+                                          children: plantGallery
+                                              .map(
+                                                (e) => Row(
+                                                  children: [
+                                                    Stack(
+                                                      children: [
+                                                        Container(
+                                                          width: 120,
+                                                          height: 120,
+                                                          decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                              10,
+                                                            ),
+                                                            image: DecorationImage(
+                                                              fit: BoxFit.cover,
+                                                              image: FileImage(
+                                                                File(e.path),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          width: 120,
+                                                          padding: EdgeInsets.fromLTRB(0, 5, 5, 0),
+                                                          child: Align(
+                                                            alignment:
+                                                            Alignment.topRight,
+                                                            child: InkWell(
+                                                              onTap: () {
+                                                                plantGallery.remove(e);
+                                                                setState(() {
+                                                                });
+                                                              },
+                                                              child: Stack(
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons.delete,
+                                                                    size: 25,
+                                                                    color: Colors.red,
+                                                                    shadows: [
+                                                                      Shadow(
+                                                                        // bottomLeft
+                                                                          offset: Offset(-1.5, -1.5),
+                                                                          color: Colors.white),
+                                                                      Shadow(
+                                                                        // bottomRight
+                                                                          offset: Offset(1.5, -1.5),
+                                                                          color: Colors.white),
+                                                                      Shadow(
+                                                                        // topRight
+                                                                          offset: Offset(1.5, 1.5),
+                                                                          color: Colors.white),
+                                                                      Shadow(
+                                                                        // topLeft
+                                                                          offset: Offset(-1.5, 1.5),
+                                                                          color: Colors.white),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    SizedBox(width: 10,),
+                                                  ],
+                                                ),
+                                              )
+                                              .toList(),
+                                        )
+                                      : SizedBox.shrink(),
                                 ],
                               ),
                             ),
@@ -419,7 +635,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                 width: 340,
                                 height: 150,
                                 child: TextFormField(
-                                  textAlign: TextAlign.center,
+                                  textAlign: TextAlign.justify,
                                   controller: _descriptionController,
                                   minLines: 6,
                                   maxLines: 7,
@@ -427,7 +643,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                   autocorrect: false,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      value = "N/A";
+                                      _descriptionController.text = "N/A";
                                     }
                                     return null;
                                   },
@@ -520,9 +736,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _plantTypeController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -533,6 +748,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                                 filled: true,
                                                 fillColor: Colors.white,
                                                 hintText: "Enter plant type",
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintStyle: const TextStyle(
                                                   fontSize: 15,
                                                   color: lightgrey,
@@ -580,9 +796,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _lifespanController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -592,6 +807,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText:
                                                     "Enter plant lifespan",
                                                 hintStyle: const TextStyle(
@@ -641,9 +857,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _bloomTimeController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -653,6 +868,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText:
                                                     "Enter plant flower bloom time",
                                                 hintStyle: const TextStyle(
@@ -702,9 +918,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _habitatController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -714,6 +929,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText: "Enter plant habitat",
                                                 hintStyle: const TextStyle(
                                                   fontSize: 15,
@@ -807,12 +1023,11 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               controller: _difficultyController,
                                               enableSuggestions: false,
                                               autocorrect: false,
-                                              minLines: 3,
-                                              maxLines: 4,
+                                              minLines: 5,
+                                              maxLines: 6,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _difficultyController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -822,6 +1037,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText:
                                                     "Enter planting difficulty",
                                                 hintStyle: const TextStyle(
@@ -871,9 +1087,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _sunlightController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -883,6 +1098,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText:
                                                     "Enter suitable sunlight",
                                                 hintStyle: const TextStyle(
@@ -932,9 +1148,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _soilController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -944,6 +1159,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText: "Enter suitable soil",
                                                 hintStyle: const TextStyle(
                                                   fontSize: 15,
@@ -985,16 +1201,17 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                           ),
                                           SizedBox(
                                             width: 200,
-                                            height: 40,
+                                            height: 100,
                                             child: TextFormField(
                                               textAlign: TextAlign.center,
                                               controller: _waterController,
                                               enableSuggestions: false,
                                               autocorrect: false,
+                                              minLines: 5,
+                                              maxLines: 6,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _waterController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -1004,6 +1221,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText: "Enter water amount",
                                                 hintStyle: const TextStyle(
                                                   fontSize: 15,
@@ -1051,12 +1269,11 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               controller: _fertilizeController,
                                               enableSuggestions: false,
                                               autocorrect: false,
-                                              minLines: 3,
-                                              maxLines: 4,
+                                              minLines: 5,
+                                              maxLines: 6,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _fertilizeController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -1066,6 +1283,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText:
                                                     "Enter fertilize info",
                                                 hintStyle: const TextStyle(
@@ -1116,9 +1334,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _plantingTimeController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -1129,6 +1346,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                                 filled: true,
                                                 fillColor: Colors.white,
                                                 hintText: "Enter planting time",
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintStyle: const TextStyle(
                                                   fontSize: 15,
                                                   color: lightgrey,
@@ -1177,9 +1395,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _harvestTimeController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -1189,6 +1406,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText: "Enter harvest time",
                                                 hintStyle: const TextStyle(
                                                   fontSize: 15,
@@ -1237,9 +1455,8 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               enableSuggestions: false,
                                               autocorrect: false,
                                               validator: (value) {
-                                                if (value == null ||
-                                                    value.isEmpty) {
-                                                  value = "N/A";
+                                                if (value == null || value.isEmpty) {
+                                                  _diseaseController.text = "N/A";
                                                 }
                                                 return null;
                                               },
@@ -1249,8 +1466,9 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                                               decoration: InputDecoration(
                                                 filled: true,
                                                 fillColor: Colors.white,
+                                                contentPadding: EdgeInsets.all(8),
                                                 hintText:
-                                                    "Enter dissease vulnerabilities",
+                                                    "Enter disease vulnerabilities",
                                                 hintStyle: const TextStyle(
                                                   fontSize: 15,
                                                   color: lightgrey,
@@ -1301,7 +1519,12 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                         height: 50,
                         child: ElevatedButton(
                           //change password button
-                          onPressed: () {},
+                          onPressed: () {
+                            setState(() {
+                              _loading = true;
+                              handleSubmit();
+                            });
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: cherry,
                             shape: RoundedRectangleBorder(
@@ -1329,6 +1552,9 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
                           ),
                         ),
                       ), //add new plant button
+                      SizedBox(
+                        height: 20,
+                      ),
                     ],
                   ),
                 ],

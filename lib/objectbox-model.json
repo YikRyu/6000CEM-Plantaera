@@ -1,0 +1,54 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:3292845533779785193",
+      "lastPropertyId": "6:1766715361606186713",
+      "name": "Reminder",
+      "properties": [
+        {
+          "id": "1:1780867541552903432",
+          "name": "id",
+          "type": 6,
+          "flags": 129
+        },
+        {
+          "id": "2:8704838421260088770",
+          "name": "reminderTitle",
+          "type": 9
+        },
+        {
+          "id": "3:5817099439167671674",
+          "name": "reminderHour",
+          "type": 9
+        },
+        {
+          "id": "4:2101585183957462055",
+          "name": "reminderMinutes",
+          "type": 9
+        },
+        {
+          "id": "5:1259726754897795070",
+          "name": "reminderDayOrNight",
+          "type": 9
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:3292845533779785193",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [
+    1766715361606186713
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

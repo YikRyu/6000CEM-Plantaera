@@ -58,7 +58,7 @@ class _GuidesListState extends State<GuidesList> with SingleTickerProviderStateM
                       borderRadius: BorderRadius.circular(20.0),
                       color: grass,
                     ),
-                    labelColor: Colors.black,
+                    labelColor: Colors.white,
                     unselectedLabelColor: Colors.black,
                     tabs: [
                       Tab(

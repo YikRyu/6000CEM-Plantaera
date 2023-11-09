@@ -1,15 +1,20 @@
-class Reminders {
-  final String id;
-  final String title;
-  final String time;
-  final String type;
+import 'package:objectbox/objectbox.dart';
 
-  Reminders({
+@Entity()
+class Reminder{
+  @Id(assignable: true)
+  int id;
+
+  String? reminderTitle;
+  String? reminderHour;
+  String? reminderMinutes;
+  String? reminderDayOrNight;
+
+  Reminder({
     required this.id,
-    required this.title,
-    required this.time,
-    required this.type,
+    required this.reminderTitle,
+    required this.reminderHour,
+    required this.reminderMinutes,
+    required this.reminderDayOrNight,
   });
-
-
 }

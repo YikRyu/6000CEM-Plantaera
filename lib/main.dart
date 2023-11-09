@@ -7,20 +7,37 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:plantaera/admin/widget/admin_bottom_nav.dart';
 import 'package:plantaera/res/colors.dart';
+import 'package:plantaera/user/view_model/notification_viewmodel.dart';
 import 'package:plantaera/user/widget/user_bottom_nav.dart';
+import 'package:plantaera/user/widget/user_nav_provider.dart';
 import 'firebase_options.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:plantaera/user/model/reminder_model.dart';
+import 'helper/object_box.dart';
 
 import 'general/view/login.dart';
 import 'package:plantaera/general/view_model/login_viewmodel.dart';
 import 'package:plantaera/admin/widget/admin_nav_provider.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+
+
+late ObjectBox objectBox;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await NotificationVM.init(initScheduled: true);
+
+  //initialize objectBox
+  objectBox = await ObjectBox.init();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -29,6 +46,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AdminNavProvider()),
+        ChangeNotifierProvider(create: (_) => UserNavProvider()),
       ],
       child: Plantaera(),
     ),
@@ -78,7 +96,9 @@ class Plantaera extends StatelessWidget {
         },
       ),
       initialRoute: '/init',
-      routes: {'/init': (context) => SplashScreen()},
+      routes: {
+        '/init': (context) => SplashScreen(),
+        '/adminBottomNav': (context) => AdminBottomNav(),},
     );
   }
 }
@@ -102,6 +122,9 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     initializeUser(); //check for user instance
     navigateUser(); //navigate to page accordingly
+
+    //initialize timezone when launching the app
+    NotificationVM.init(initScheduled : true);
   }
 
   Future initializeUser() async {

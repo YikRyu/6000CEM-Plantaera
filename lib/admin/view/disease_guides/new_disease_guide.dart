@@ -1,6 +1,10 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:plantaera/admin/view_model/admin_disease_viewmodel.dart';
 import 'package:plantaera/res/colors.dart';
+import 'dart:io';
 
 class NewDiseaseGuide extends StatefulWidget {
   const NewDiseaseGuide({Key? key}) : super(key: key);
@@ -18,9 +22,75 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
   TextEditingController _causesController = TextEditingController();
   TextEditingController _solutionController = TextEditingController();
   TextEditingController _preventionController = TextEditingController();
-  TextEditingController _galleryController = TextEditingController();
 
+  XFile? diseaseCover;
+  List<XFile> diseaseGallery = [];
+  String newDiseaseMessage = '';
   bool _loading = false;
+  AdminDiseaseVM diseaseVm = AdminDiseaseVM();
+
+  //Function for disease cover image picker
+  Future<XFile?> diseaseCoverPicker() async {
+    return await ImagePicker().pickImage(source: ImageSource.gallery);
+  }
+
+  //Function for gallery image picker
+  Future<List<XFile>> galleryImagePicker() async {
+    List<XFile>? _gallery = await ImagePicker().pickMultiImage();
+
+    if (_gallery.length != 0 && _gallery.isNotEmpty) {
+      return _gallery;
+    }
+    return [];
+  }
+
+  //function for new plant
+  handleSubmit() async {
+    if (newDiseaseFormKey.currentState!.validate() && diseaseCover != null && diseaseGallery.length != 0) {
+      final diseaseName = _diseaseNameController.value.text;
+      final diseaseNameLowerCase = diseaseName.toLowerCase();
+      final symptoms = _symptomsController.value.text;
+      final causes = _causesController.value.text;
+      final solutions = _solutionController.value.text;
+      final preventions = _preventionController.value.text;
+
+      //call the function in VM to add data into db
+      newDiseaseMessage = await diseaseVm.addDiseaseToDB(diseaseName, diseaseNameLowerCase, symptoms, causes, solutions, preventions, diseaseCover!, diseaseGallery);
+
+      if (newDiseaseMessage == "ok") {
+        //redirect back to admin list with toaster message shown
+        Fluttertoast.showToast(
+          msg: "New disease added successfully! Redirecting back to previous page....",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        setState(() {
+          _loading = false;
+        });
+        Navigator.pop(context);
+        _loading = false;
+      } else {
+        setState(() {
+          _loading = false; //for the loading progress bar
+        });
+      }
+    } else if (diseaseCover == null) {
+      setState(() {
+        _loading = false;
+      });
+      return newDiseaseMessage = "Please insert disease cover!";
+    } else if (diseaseGallery.length == 0) {
+      setState(() {
+        _loading = false;
+      });
+      return newDiseaseMessage = "Please insert at least one picture into gallery!";
+    } else {
+      setState(() {
+        _loading = false;
+      });
+      return newDiseaseMessage = "Please insert all fields";
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +142,7 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                               autocorrect: false,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Please enter plant name';
+                                  return 'Please enter disease name';
                                 }
                                 return null;
                               },
@@ -99,11 +169,117 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                             ),
                           ),
                         ],
-                      ), //disease name field
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ), //spacing
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            width: 100,
+                            child: Text(
+                              "Disease Cover: ",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: deepPink,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          diseaseCover == null
+                              ? InkWell(
+                                  onTap: () async {
+                                    diseaseCover = await diseaseCoverPicker();
+                                    setState(() {});
+                                  },
+                                  child: DottedBorder(
+                                    borderType: BorderType.RRect,
+                                    color: darkgrey,
+                                    strokeWidth: 4.0,
+                                    dashPattern: [6],
+                                    radius: Radius.circular(10.0),
+                                    child: Container(
+                                      width: 150,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          10,
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                DottedBorder(
+                                                  borderType: BorderType.RRect,
+                                                  color: darkgrey,
+                                                  strokeWidth: 2.0,
+                                                  dashPattern: [5],
+                                                  radius: Radius.circular(50.0),
+                                                  child: Container(
+                                                    height: 40,
+                                                    width: 40,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.grey,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.add,
+                                                      size: 35,
+                                                      color: darkgrey,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 10.0,
+                                            ), //spacing
+                                            Center(
+                                              child: Text(
+                                                "Add Disease Cover",
+                                                style: TextStyle(
+                                                  fontSize: 18.0,
+                                                  color: Colors.black,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : InkWell(
+                                  onTap: () async {
+                                    diseaseCover = await diseaseCoverPicker();
+                                    setState(() {});
+                                  },
+                                  child: Container(
+                                    width: 150,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      image: DecorationImage(
+                                        fit: BoxFit.cover,
+                                        image: FileImage(File(diseaseCover!.path)),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                        ],
+                      ),
                       SizedBox(
                         height: 30.0,
                       ), //spacing
-
 
                       Container(
                         width: double.infinity,
@@ -139,79 +315,170 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                               scrollDirection: Axis.horizontal,
                               padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Align(
                                     alignment: Alignment.centerLeft,
-                                    child: Card(
-                                      child: InkWell(
-                                        onTap: () {},
-                                        child: DottedBorder(
-                                          borderType: BorderType.RRect,
-                                          color: darkgrey,
-                                          strokeWidth: 4.0,
-                                          dashPattern: [6],
-                                          radius: Radius.circular(10.0),
-                                          child: Container(
-                                            width: 150,
-                                            height: 125,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(10.0),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                    children: [
-                                                      DottedBorder(
-                                                        borderType: BorderType.RRect,
-                                                        color: darkgrey,
-                                                        strokeWidth: 2.0,
-                                                        dashPattern: [5],
-                                                        radius: Radius.circular(40.0),
-                                                        child: Container(
-                                                          height: 40,
-                                                          width: 40,
-                                                          decoration: BoxDecoration(
-                                                            color: Colors.grey,
-                                                            shape: BoxShape.circle,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons.add,
-                                                            size: 35,
-                                                            color: darkgrey,
-                                                          ),
+                                    child: InkWell(
+                                      onTap: () async {
+                                        List<XFile>? plantGalleryList =
+                                        await galleryImagePicker();
+                                        if (plantGalleryList.isNotEmpty) {
+                                          for(XFile _imageList in plantGalleryList){
+                                            diseaseGallery.add(_imageList);
+                                          }
+                                          setState(() {});
+                                        }
+                                      },
+                                      child: DottedBorder(
+                                        borderType: BorderType.RRect,
+                                        color: darkgrey,
+                                        strokeWidth: 4.0,
+                                        dashPattern: [5],
+                                        radius: Radius.circular(10.0),
+                                        child: Container(
+                                          width: 120,
+                                          height: 120,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(10,),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                                  children: [
+                                                    DottedBorder(
+                                                      borderType:
+                                                      BorderType.RRect,
+                                                      color: darkgrey,
+                                                      strokeWidth: 2.0,
+                                                      dashPattern: [5],
+                                                      radius:
+                                                      Radius.circular(50.0),
+                                                      child: Container(
+                                                        height: 40,
+                                                        width: 40,
+                                                        decoration:
+                                                        BoxDecoration(
+                                                          color: Colors.grey,
+                                                          shape:
+                                                          BoxShape.circle,
+                                                        ),
+                                                        child: Icon(
+                                                          Icons.add,
+                                                          size: 35,
+                                                          color: darkgrey,
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(
-                                                    height: 10.0,
-                                                  ), //spacing
-                                                  Center(
-                                                    child: Text(
-                                                      "Add New Picture",
-                                                      style: TextStyle(
-                                                        fontSize: 20.0,
-                                                        color: Colors.black,
-                                                      ),
-                                                      textAlign: TextAlign.center,
                                                     ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 10.0,
+                                                ), //spacing
+                                                Center(
+                                                  child: Text(
+                                                    "Add Disease Picture",
+                                                    style: TextStyle(
+                                                      fontSize: 18.0,
+                                                      color: Colors.black,
+                                                    ),
+                                                    textAlign: TextAlign.center,
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
+                                  SizedBox(width: 10,),
+                                  diseaseGallery.length != 0 &&
+                                      diseaseGallery.isNotEmpty
+                                      ? Wrap(
+                                    alignment: WrapAlignment.spaceBetween,
+                                    children: diseaseGallery
+                                        .map(
+                                          (e) => Row(
+                                        children: [
+                                          Stack(
+                                            children: [
+                                              Container(
+                                                width: 120,
+                                                height: 120,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                  BorderRadius
+                                                      .circular(
+                                                    10,
+                                                  ),
+                                                  image: DecorationImage(
+                                                    fit: BoxFit.cover,
+                                                    image: FileImage(
+                                                      File(e.path),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Container(
+                                                width: 120,
+                                                padding: EdgeInsets.fromLTRB(0, 5, 5, 0),
+                                                child: Align(
+                                                  alignment:
+                                                  Alignment.topRight,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      diseaseGallery.remove(e);
+                                                      setState(() {
+                                                      });
+                                                    },
+                                                    child: Stack(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.delete,
+                                                          size: 25,
+                                                          color: Colors.red,
+                                                          shadows: [
+                                                            Shadow(
+                                                              // bottomLeft
+                                                                offset: Offset(-1.5, -1.5),
+                                                                color: Colors.white),
+                                                            Shadow(
+                                                              // bottomRight
+                                                                offset: Offset(1.5, -1.5),
+                                                                color: Colors.white),
+                                                            Shadow(
+                                                              // topRight
+                                                                offset: Offset(1.5, 1.5),
+                                                                color: Colors.white),
+                                                            Shadow(
+                                                              // topLeft
+                                                                offset: Offset(-1.5, 1.5),
+                                                                color: Colors.white),
+                                                          ],
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(width: 10,),
+                                        ],
+                                      ),
+                                    )
+                                        .toList(),
+                                  )
+                                      : SizedBox.shrink(),
                                 ],
                               ),
                             ),
@@ -222,10 +489,9 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                         height: 30.0,
                       ),
 
-
                       Container(
                         width: double.infinity,
-                        height: 200,
+                        height: 150,
                         decoration: BoxDecoration(
                           border: Border(
                             top: BorderSide(
@@ -266,7 +532,7 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                                   autocorrect: false,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      value = "N/A";
+                                      _symptomsController.text = "N/A";
                                     }
                                     return null;
                                   },
@@ -296,8 +562,9 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                           ],
                         ),
                       ), //symptoms container
-                      SizedBox(height: 30,), //spacing
-
+                      SizedBox(
+                        height: 30,
+                      ), //spacing
 
                       Container(
                         width: double.infinity,
@@ -342,7 +609,7 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                                   autocorrect: false,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      value = "N/A";
+                                      _causesController.text = "N/A";
                                     }
                                     return null;
                                   },
@@ -372,8 +639,9 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                           ],
                         ),
                       ), //cause container
-                      SizedBox(height: 30,),
-
+                      SizedBox(
+                        height: 30,
+                      ),
 
                       Container(
                         width: double.infinity,
@@ -418,7 +686,7 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                                   autocorrect: false,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      value = "N/A";
+                                      _solutionController.text = "N/A";
                                     }
                                     return null;
                                   },
@@ -448,8 +716,9 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                           ],
                         ),
                       ), //solution container
-                      SizedBox(height: 30,),
-
+                      SizedBox(
+                        height: 30,
+                      ),
 
                       Container(
                         width: double.infinity,
@@ -494,7 +763,7 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                                   autocorrect: false,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      value = "N/A";
+                                      _preventionController.text = "N/A";
                                     }
                                     return null;
                                   },
@@ -524,14 +793,28 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                           ],
                         ),
                       ), //preventions container
-                      SizedBox(height: 30,),
+                      SizedBox(
+                        height: 30,
+                      ),
 
-
+                      Center(
+                          child: Text(
+                        newDiseaseMessage,
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 15,
+                        ),
+                      )),
                       SizedBox(
                         width: 330,
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            setState(() {
+                              _loading = true;
+                              handleSubmit();
+                            });
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: cherry,
                             shape: RoundedRectangleBorder(
@@ -542,23 +825,27 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
                           child: Center(
                             child: _loading
                                 ? const SizedBox(
-                              width: 50,
-                              height: 44,
-                              child: CircularProgressIndicator(
-                                color: pastelPink,
-                                strokeWidth: 2,
-                              ),
-                            )
+                                    width: 50,
+                                    height: 44,
+                                    child: CircularProgressIndicator(
+                                      color: pastelPink,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
                                 : const Text(
-                              "Add New Disease",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
+                                    "Add New Disease",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
                           ),
                         ),
                       ), //add new disease button
+
+                      SizedBox(
+                        height: 20,
+                      ), //bottom spacing
                     ],
                   ),
                 ],

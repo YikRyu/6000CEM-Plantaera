@@ -83,7 +83,7 @@ class _FavoriteGuidesListState extends State<FavoriteGuidesList>
                       borderRadius: BorderRadius.circular(20.0),
                       color: grass,
                     ),
-                    labelColor: Colors.black,
+                    labelColor: Colors.white,
                     unselectedLabelColor: Colors.black,
                     tabs: [
                       Tab(

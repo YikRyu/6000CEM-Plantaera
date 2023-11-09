@@ -1,7 +1,15 @@
 //reference time picker: https://www.dhiwise.com/post/craft-amazing-user-experiences-with-flutter-time-picker
+//notification ref: https://www.youtube.com/watch?v=bRy5dmts3X8
+
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:plantaera/main.dart';
 import 'package:plantaera/res/colors.dart';
+import 'package:plantaera/user/model/reminder_model.dart';
+import 'package:plantaera/user/view_model/notification_viewmodel.dart';
+import 'package:plantaera/helper/object_box.dart';
 
 class NewReminder extends StatefulWidget {
   const NewReminder({Key? key}) : super(key: key);
@@ -14,15 +22,18 @@ class _NewReminderState extends State<NewReminder> {
   final newReminderFormKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   String? _typeController;
+  TimeOfDay? pickedTime;
 
   String newReminderStatusText = '';
   String timeText = 'Pick a time for reminder';
   bool _loading = false;
   String typeText = 'Pick a reminder type';
+  String tempHour = '';
+  String tempMinute = '';
+  String dayOrNight = '';
+
 
   timePicker() async {
-    String dayOrNight = '';
-
     final TimeOfDay? time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -34,18 +45,25 @@ class _NewReminderState extends State<NewReminder> {
       },
     );
     if (time != null) {
-      String tempHour = time.hour.toString();
-      String tempMinute = time.minute.toString();
+      pickedTime = time;
+      tempHour = time.hour.toString();
+      tempMinute = time.minute.toString();
 
+      //change to int for comparing
       int intTempHour = int.parse(tempHour);
+      int intTempMinute = int.parse(tempMinute);
 
       if (intTempHour > 12) {
         dayOrNight = 'P.M.'; //set to night
-        intTempHour = intTempHour - 12; //minute 12 hours
+        intTempHour = intTempHour - 12; //minus 12 hours
         tempHour = intTempHour.toString(); //change to string fr display
       } else {
         dayOrNight = 'A.M.';
       }
+      if(intTempMinute < 10){
+        tempMinute = "0${tempMinute}";
+      }
+
       setState(() {
         timeText = "$tempHour : $tempMinute $dayOrNight";
       });
@@ -61,7 +79,43 @@ class _NewReminderState extends State<NewReminder> {
     }
   }
 
-  handleSubmit() {}
+  int notificationIdGenerator() {
+    int idGenerator = Random().nextInt(100000);
+
+    return idGenerator;
+  }
+
+  handleSubmit() async{
+    if(newReminderFormKey.currentState!.validate() && pickedTime != null){
+      String title = _titleController.value.text;
+      int notificationId = notificationIdGenerator();
+
+      await NotificationVM.scheduleNotification(notificationId, title, title, pickedTime!);
+
+      final reminder = Reminder(
+        id: notificationId,
+        reminderTitle: title,
+        reminderHour: tempHour,
+        reminderMinutes: tempMinute,
+        reminderDayOrNight: dayOrNight,
+      );
+      await objectBox.newReminder(reminder); //insert reminder into objectBox db
+
+      Fluttertoast.showToast(
+        msg: "Added new reminder.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
+      Navigator.pop(context);
+
+    }else if(pickedTime == null){
+      newReminderStatusText = 'Please select a time!';
+    }
+    else{
+      newReminderStatusText = "Please insert all fields!";
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +250,7 @@ class _NewReminderState extends State<NewReminder> {
                         height: 30,
                       ), //spacing
 
-                      Center(
+                      /*Center(
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
@@ -221,10 +275,13 @@ class _NewReminderState extends State<NewReminder> {
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                         child: DropdownButton(
-                          hint: Text(
-                            typeText,
-                            style: TextStyle(
-                                fontSize: 17, color: hintTextColor(typeText)),
+                          hint: Center(
+                            child: Text(
+                              typeText,
+                              style: TextStyle(
+                                  fontSize: 17, color: hintTextColor(typeText)),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                           value: _typeController,
                           isExpanded: true,
@@ -241,11 +298,12 @@ class _NewReminderState extends State<NewReminder> {
                             setState(() {});
                           },
                         ),
-                      ), //text field for gender
+                      ), //text field notification type
 
                       SizedBox(
                         height: 30,
-                      ),
+                      ),*/
+
                       Text(
                         newReminderStatusText,
                         style: TextStyle(

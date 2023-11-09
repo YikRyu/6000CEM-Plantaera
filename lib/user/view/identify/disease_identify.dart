@@ -1,6 +1,12 @@
+//image classification ref: https://medium.com/@utsavdutta/image-classification-using-flutter-tensorflowlite-322a66998aa4
+
 import 'package:flutter/material.dart';
 import 'package:plantaera/res/colors.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'dart:io';
+import 'dart:async';
+import 'package:tflite_v2/tflite_v2.dart';
+import 'package:image_picker/image_picker.dart';
 
 class IdentifyDisease extends StatefulWidget {
   const IdentifyDisease({Key? key}) : super(key: key);
@@ -10,8 +16,114 @@ class IdentifyDisease extends StatefulWidget {
 }
 
 class _IdentifyDiseaseState extends State<IdentifyDisease> {
+  XFile? imagePath;
+  List<dynamic> diseaseResult = [];
   String diseaseName = 'Upload a picture/ Take a picture to identify';
+  String identifyStatus = '';
+  String confidence = '';
   bool _loading = false;
+
+
+  //pick image from mobile camera
+  Future<XFile?> imgFromCamera() async {
+    return await ImagePicker().pickImage(source: ImageSource.camera);
+  }
+
+  Future<XFile?> imgFromGallery() async {
+    return await ImagePicker().pickImage(source: ImageSource.gallery);
+  }
+
+
+  //loading the plant classification model
+  Future loadDiseaseModel() async {
+    Tflite.close();
+    String? res;
+    res = await Tflite.loadModel(
+      model: "assets/disease_model.tflite",
+      labels: "assets/disease_labels.txt",
+    );
+  }
+
+  Future diseaseClassification(XFile image) async {
+    // Run tflite image classification model on the image
+    final List? results = await Tflite.runModelOnImage(
+      path: image.path,
+      numResults: 1,
+      threshold: 0.05,
+      imageMean: 127.5,
+      imageStd: 127.5,
+    );
+
+    setState(() {
+      for(dynamic result in results!){
+        diseaseName = result['label'];
+        confidence = result['confidence'].toStringAsFixed(2);
+      }
+      identifyStatus = '';
+    });
+  }
+
+  identify(){
+    if(imagePath == null){
+      setState(() {
+        identifyStatus = 'Please select an image to identify!';
+      });
+    }else{
+      diseaseClassification(imagePath!);
+    }
+  }
+
+  //show image picker
+  void _showImagePicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(
+                        Icons.photo_library,
+                        color: darkGreen,
+                      ),
+                      title: new Text('Gallery'),
+                      onTap: () async{
+                        imagePath = await imgFromGallery();
+                        Navigator.of(context).pop();
+                        setState(() {
+                        });
+                      }),
+                  new ListTile(
+                    leading: new Icon(
+                      Icons.photo_camera,
+                      color: darkGreen,
+                    ),
+                    title: new Text('Camera'),
+                    onTap: () async{
+                      imagePath = await imgFromCamera();
+                      Navigator.of(context).pop();
+                      setState(() {
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadDiseaseModel();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,8 +163,11 @@ class _IdentifyDiseaseState extends State<IdentifyDisease> {
 
               Center(
                 child: Card(
-                  child: InkWell(
-                    onTap: () {},
+                  child: imagePath == null
+                      ? InkWell(
+                    onTap: () {
+                      _showImagePicker(context);
+                    },
                     child: Container(
                       height: 350,
                       width: 300,
@@ -76,30 +191,81 @@ class _IdentifyDiseaseState extends State<IdentifyDisease> {
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                MainAxisAlignment.center,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.camera_alt, color: Colors.black, size: 45,),
-                                      SizedBox(width: 10.0,), //spacing
-                                      Text("Take a picture", style: TextStyle(fontSize: 20, color: Colors.black,),),
+                                      Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.black,
+                                        size: 45,
+                                      ),
+                                      SizedBox(
+                                        width: 10.0,
+                                      ), //spacing
+                                      Text(
+                                        "Take a picture",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ],
                                   ),
-                                  SizedBox(height: 10.0,), //spacing
-                                  Text("OR", style: TextStyle(fontSize: 20.0, color: Colors.black,),),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ), //spacing
+                                  Text(
+                                    "OR",
+                                    style: TextStyle(
+                                      fontSize: 20.0,
+                                      color: Colors.black,
+                                    ),
+                                  ),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.center,
                                     children: [
-                                      Text("Upload a picture", style: TextStyle(fontSize: 20, color: Colors.black,),),
-                                      SizedBox(width: 10.0,),
-                                      Icon(Icons.photo, color: Colors.black, size: 45,),
+                                      Text(
+                                        "Upload a picture",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      Icon(
+                                        Icons.photo,
+                                        color: Colors.black,
+                                        size: 45,
+                                      ),
                                     ],
                                   ),
                                 ],
                               ),
                             ),
                           ),
+                        ),
+                      ),
+                    ),
+                  )
+                      : InkWell(
+                    onTap: () {
+                      _showImagePicker(context);
+                    },
+                    child: Container(
+                      height: 350,
+                      width: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        image: DecorationImage(
+                          fit: BoxFit.cover,
+                          image: FileImage(File(imagePath!.path)),
                         ),
                       ),
                     ),
@@ -111,7 +277,11 @@ class _IdentifyDiseaseState extends State<IdentifyDisease> {
               ), //spacing
 
               Center(
-                child: Card(
+                child: diseaseName == 'Upload a picture/ Take a picture to identify'
+                    ? Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: Container(
                     padding: EdgeInsets.all(8.0),
                     height: 70,
@@ -124,28 +294,74 @@ class _IdentifyDiseaseState extends State<IdentifyDisease> {
                         color: darkGreen,
                       ),
                     ),
-                    child: Center(
-                        child: Text(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
                           diseaseName,
                           style: TextStyle(
                             fontSize: 18,
                             color: Colors.black,
                           ),
                           textAlign: TextAlign.center,
-                        )),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+                    : Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    height: 70,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10.0),
+                      border: Border.all(
+                        width: 1.0,
+                        color: darkGreen,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          diseaseName,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        /*Text(
+                          'Confidence: ${confidence}%',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.grey,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),*/
+                      ],
+                    ),
                   ),
                 ),
-              ), //plant name
+              ), //disease result
               SizedBox(
                 height: 20,
               ), //spacing
 
+              Center(child: Text(identifyStatus, style: TextStyle(color: Colors.red, fontSize: 15,),)),
               SizedBox(
                 width: 150,
                 height: 45,
                 child: ElevatedButton(
                   //sign in button
-                  onPressed: () {},
+                  onPressed: () { identify(); },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: grass,
                     shape: RoundedRectangleBorder(

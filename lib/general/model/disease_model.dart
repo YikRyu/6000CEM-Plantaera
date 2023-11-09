@@ -1,34 +1,24 @@
 class Diseases {
   final String id;
   final String name;
+  final String nameLowerCase;
   final String symptoms;
   final String cause;
   final String solutions;
   final String preventions;
   final String cover;
-  final List<String> favorites;
+  final List<String> favorite;
 
   Diseases({
     required this.id,
     required this.name,
+    required this.nameLowerCase,
     required this.symptoms,
     required this.cause,
     required this.solutions,
     required this.preventions,
     required this.cover,
-    required this.favorites,
+    required this.favorite,
   });
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name' : name,
-    'nameSmallCase' : name.toLowerCase(),
-    'symptoms': symptoms,
-    'cause' : cause,
-    'solutions' : solutions,
-    'preventions' : preventions,
-    'cover' : cover,
-    'favorites': [],
-  };
 
 }

@@ -1,3 +1,5 @@
+//delete user reference: https://medium.com/@Ruben.Aster/delete-user-accounts-in-flutter-apps-with-firebase-auth-de3740d3ba54
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -24,7 +26,7 @@ class AdminVM {
       } else if (e.code == 'email-already-in-use') {
         return "Email already registered, please login or register with another email!";
       } else {
-        return "Unknown error occurred...";
+        return "Unknown error occurred: ${e.toString()}";
       }
     }
   }
@@ -50,7 +52,7 @@ class AdminVM {
       if (documentSnapshot.exists) {
         return documentSnapshot.data();  }
     } catch (e) {
-      throw Exception('Error occurred while fetching admin information: $e');
+      throw Exception('Error occurred while fetching admin information: ${e.toString()}');
     }
   }
 
@@ -72,7 +74,15 @@ class AdminVM {
       flag = true;
     }).catchError((error){
       flag = false;
-      errorMessage = error.toString();
+      if(error.code == "invalid-credential"){
+        errorMessage = "Invalid credentials";
+      }
+      else if(error.code == "wrong-password"){
+        errorMessage = "Wrong password provided";
+      }
+      else{
+        errorMessage = error.toString();
+      }
     });
 
     if (flag == true){
@@ -81,5 +91,41 @@ class AdminVM {
     else{
       return "Failed to update password: $errorMessage";
     }
+  }
+
+  Future<String> deleteAdmin(String email, String password, String adminId) async{
+    var user = await FirebaseAuth.instance.currentUser!;
+    var credentials = EmailAuthProvider.credential(email: email, password: password);
+    bool flag = false;
+    String errorMessage = '';
+
+    await user.reauthenticateWithCredential(credentials).then((value) {
+      user.delete();
+      deleteAdminFromDB(adminId);
+      flag = true;
+    }).catchError((error){
+      flag = false;
+      if(error.code == "invalid-credential"){
+        errorMessage = "Invalid credentials";
+      }
+      else if(error.code == "wrong-password"){
+        errorMessage = "Wrong password provided";
+      }
+      else{
+        errorMessage = error.toString();
+      }
+    });
+
+    if (flag == true){
+      return "ok";
+    }
+    else{
+      return "Failed to update password: $errorMessage";
+    }
+  }
+
+  //delete admin from db
+  Future<void> deleteAdminFromDB(String currentAdminId) {
+    return FirebaseFirestore.instance.collection('users').doc(currentAdminId).delete();
   }
 }

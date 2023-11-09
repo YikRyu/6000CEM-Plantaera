@@ -7,6 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:plantaera/res/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:plantaera/user/widget/user_nav_provider.dart';
+import 'package:provider/provider.dart';
+
 import 'package:plantaera/user/view/home/homepage.dart';
 import 'package:plantaera/user/view/others/others.dart';
 import 'package:plantaera/user/view/identify/identify.dart';
@@ -62,7 +65,7 @@ class _UserBottomNavState extends State<UserBottomNav> {
         ),
         home: Scaffold(
           body: IndexedStack(
-            index: navIndex,
+            index: context.watch<UserNavProvider>().navIndex,
             children: screens,
           ),
           bottomNavigationBar: BottomNavigationBar(
@@ -72,9 +75,9 @@ class _UserBottomNavState extends State<UserBottomNav> {
             unselectedItemColor: grass,
             showUnselectedLabels: true,
             unselectedLabelStyle: const TextStyle(color: grass, fontSize: 11),
-            currentIndex: navIndex,
+            currentIndex: context.watch<UserNavProvider>().navIndex,
             onTap: (value) {
-              setState(() {navIndex = value;});
+              setState(() {context.read<UserNavProvider>().changeOnNav(value);});
             },
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(

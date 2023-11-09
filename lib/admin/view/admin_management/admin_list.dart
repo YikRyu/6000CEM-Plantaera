@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:plantaera/admin/view/admin_management/change_password_admin.dart';
+import 'package:plantaera/admin/view/admin_management/delete_admin.dart';
 import 'package:plantaera/admin/view/admin_management/new_admin.dart';
+import 'package:plantaera/admin/view/admin_management/widget/delete_admin_dialog.dart';
 import 'package:plantaera/admin/view_model/admin_viewmodel.dart';
 import 'package:plantaera/res/colors.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../general/view/login.dart';
+import 'widget/changePassword_dialog.dart';
 
 class AdminList extends StatefulWidget {
   AdminList({Key? key}) : super(key: key);
@@ -28,6 +31,43 @@ class _AdminListState extends State<AdminList> {
     await _auth.signOut().then((value) => Navigator.of(context)
         .pushAndRemoveUntil(MaterialPageRoute(builder: (context) => Login()),
             (route) => false));
+  }
+
+  //change password
+  changePassword(String id, String email){
+    if(id != currentAdminId){
+      showDialog(barrierDismissible: true,context: context, builder: (context) => ChangePasswordDialog(email : email,),);
+    }
+    else{
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) {
+                return ChangeAdminPassword();
+              },
+              settings: RouteSettings(arguments: {
+                'email': email,
+              })));
+    }
+
+  }
+
+  //delete admin
+  deleteAdmin(String id, String email){
+    if(id != currentAdminId){
+      showDialog(barrierDismissible: true,context: context, builder: (context) => DeleteAdminDialog(email : email,),);
+    }
+    else{
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) {
+                return DeleteAdmin();
+              },
+              settings: RouteSettings(arguments: {
+                'email': email,
+              })));;
+    }
   }
 
   @override
@@ -78,7 +118,7 @@ class _AdminListState extends State<AdminList> {
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 15,
               ),
 
               Container(
@@ -104,22 +144,14 @@ class _AdminListState extends State<AdminList> {
                 ),
               ), //current admin section banner
               SizedBox(
-                height: 20,
+                height: 15,
               ),
               SizedBox(
                 width: 250,
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) {
-                              return ChangeAdminPassword();
-                            },
-                            settings: RouteSettings(arguments: {
-                              'email': currentAdminEmail!,
-                            })));
+                    changePassword(currentAdminId, currentAdminEmail!);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: cherry,
@@ -138,9 +170,35 @@ class _AdminListState extends State<AdminList> {
                     ),
                   ),
                 ),
+              ), //change password button
+              SizedBox(
+                height: 15,
               ),
               SizedBox(
-                height: 20,
+                width: 250,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () => deleteAdmin(currentAdminId, currentAdminEmail!),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: cherry,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    shadowColor: Colors.grey.withOpacity(0.9),
+                  ),
+                  child: Center(
+                    child: const Text(
+                      "Delete Admin",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              ), //delete current admin button
+              SizedBox(
+                height: 15,
               ),
               SizedBox(
                 width: 250,
@@ -164,7 +222,7 @@ class _AdminListState extends State<AdminList> {
                     ),
                   ),
                 ),
-              ),
+              ), //logout button
               SizedBox(
                 height: 30,
               ), //spacing
@@ -211,15 +269,15 @@ class _AdminListState extends State<AdminList> {
                           Map<String, dynamic> adminModel =
                               snapshot.data?.docs[index].data();
                           String email = adminModel['email'];
+                          String id = adminModel['id'];
 
-                          //show cards of admins
                           return Center(
                             child: Container(
                               width: 320,
                               height: 80,
                               child: Card(
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
+                                  borderRadius: BorderRadius.circular(10),),
                                 child: Container(
                                   padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                                   child: Row(
@@ -228,7 +286,7 @@ class _AdminListState extends State<AdminList> {
                                       SizedBox(
                                         width: 200,
                                         child: Text(
-                                          adminModel['email'],
+                                          email,
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -241,21 +299,15 @@ class _AdminListState extends State<AdminList> {
                                         children: [
                                           InkWell(
                                             onTap: (){
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (context) {
-                                                        return ChangeAdminPassword();
-                                                      },
-                                                      settings: RouteSettings(arguments: {
-                                                        'email': email,
-                                                      })));
+                                              changePassword(id, email);
                                             },
                                             child: Icon(Icons.edit, size: 30, color: deepPink,),
                                           ),
                                           SizedBox(width: 10.0,),
                                           InkWell(
-                                            onTap: (){},
+                                            onTap: (){
+                                              deleteAdmin(id, email);
+                                            },
                                             child: Icon(Icons.delete, size: 30, color: deepPink,),
                                           ),
                                         ],
@@ -266,6 +318,8 @@ class _AdminListState extends State<AdminList> {
                               ),
                             ),
                           );
+
+
                         },
                       ),
                     );
