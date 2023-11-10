@@ -83,14 +83,17 @@ class _ReminderListState extends State<ReminderList> {
                                       padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Text(reminderModel.reminderTitle!, style: TextStyle(fontSize: 18, color: Colors.black),),
-                                              Text("${reminderModel.reminderHour} : ${reminderModel.reminderMinutes} ${reminderModel.reminderDayOrNight}" ,style: TextStyle(fontSize: 15, color: darkgrey,),),
-                                            ],
+                                          Container(
+                                            width: 240,
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(reminderModel.reminderTitle!, style: TextStyle(fontSize: 18, color: Colors.black),),
+                                                Text("${reminderModel.reminderHour} : ${reminderModel.reminderMinutes} ${reminderModel.reminderDayOrNight}" ,style: TextStyle(fontSize: 15, color: darkgrey,),),
+                                              ],
+                                            ),
                                           ),
                                           InkWell(
                                             onTap: () async {

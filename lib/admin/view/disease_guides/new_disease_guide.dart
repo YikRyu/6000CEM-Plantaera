@@ -88,7 +88,7 @@ class _NewDiseaseGuideState extends State<NewDiseaseGuide> {
       setState(() {
         _loading = false;
       });
-      return newDiseaseMessage = "Please insert all fields";
+      return newDiseaseMessage = "Please insert all required fields";
     }
   }
 

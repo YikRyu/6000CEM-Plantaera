@@ -62,7 +62,7 @@ class _NewGeneralGuideState extends State<NewGeneralGuide> {
       setState(() {
         _loading = false;
       });
-      return newArticleStatusMessage = "Please insert all fields";
+      return newArticleStatusMessage = "Please insert all required fields";
     }
   }
 

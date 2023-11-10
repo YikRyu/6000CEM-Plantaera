@@ -139,7 +139,7 @@ class _NewPlantGuideState extends State<NewPlantGuide> {
       setState(() {
         _loading = false;
       });
-      return newPlantStateMessage = "Please insert all fields";
+      return newPlantStateMessage = "Please insert all required fields";
     }
   }
 

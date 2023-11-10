@@ -22,7 +22,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
   List<String> plantGalleryPaths = [];
 
   favoriteFunction(String plantId, String name) async {
-    if(favorited){
+    if (favorited) {
       //remove plant from fav if found in the fav list
       await plantVM.removeFavorite(plantId, currentUserId);
       favorited = false;
@@ -32,8 +32,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
-
-    }else{
+    } else {
       //add plant into fav list
       await plantVM.addFavorite(plantId, currentUserId);
       favorited = true;
@@ -44,13 +43,11 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
         gravity: ToastGravity.BOTTOM,
       );
     }
-
   }
 
   @override
   Widget build(BuildContext context) {
-    final arguments =
-    ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     //fetch arguments passed from previous page
     plantId = arguments['plantId']!;
     favorited = arguments['favorited']!;
@@ -73,47 +70,46 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
           ),
           actions: [
             favorited
-            ? IconButton(
-              onPressed: () {
-                favoriteFunction(plantId, name);
-                setState(() {
-                });
-              },
-              icon: Icon(
-                Icons.favorite,
-                color: favorite,
-                size: 30,
-              ),
-            )
-            : IconButton(
-              onPressed: () {
-                favoriteFunction(plantId, name);
-                setState(() {});
-              },
-              icon: Icon(
-                Icons.favorite,
-                color: Colors.white,
-                size: 28,
-                shadows: [
-                  Shadow(
-                    // bottomLeft
-                      offset: Offset(-1.5, -1.5),
-                      color: darkgrey),
-                  Shadow(
-                    // bottomRight
-                      offset: Offset(1.5, -1.5),
-                      color: darkgrey),
-                  Shadow(
-                    // topRight
-                      offset: Offset(1.5, 1.5),
-                      color: darkgrey),
-                  Shadow(
-                    // topLeft
-                      offset: Offset(-1.5, 1.5),
-                      color: darkgrey),
-                ],
-              ),
-            ),
+                ? IconButton(
+                    onPressed: () {
+                      favoriteFunction(plantId, name);
+                      setState(() {});
+                    },
+                    icon: Icon(
+                      Icons.favorite,
+                      color: favorite,
+                      size: 30,
+                    ),
+                  )
+                : IconButton(
+                    onPressed: () {
+                      favoriteFunction(plantId, name);
+                      setState(() {});
+                    },
+                    icon: Icon(
+                      Icons.favorite,
+                      color: Colors.white,
+                      size: 28,
+                      shadows: [
+                        Shadow(
+                            // bottomLeft
+                            offset: Offset(-1.5, -1.5),
+                            color: darkgrey),
+                        Shadow(
+                            // bottomRight
+                            offset: Offset(1.5, -1.5),
+                            color: darkgrey),
+                        Shadow(
+                            // topRight
+                            offset: Offset(1.5, 1.5),
+                            color: darkgrey),
+                        Shadow(
+                            // topLeft
+                            offset: Offset(-1.5, 1.5),
+                            color: darkgrey),
+                      ],
+                    ),
+                  ),
           ],
         ),
         body: SafeArea(
@@ -144,7 +140,6 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                       break;
                     }
                   }
-
 
                   return Expanded(
                     child: ListView.builder(
@@ -214,15 +209,12 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                   ), //spacing
                                   SingleChildScrollView(
                                     scrollDirection: Axis.horizontal,
-                                    padding:
-                                    const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                     child: Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
                                         FutureBuilder<String>(
-                                          future: plantVM.fetchPlantCover(
-                                              plantId, coverPath),
+                                          future: plantVM.fetchPlantCover(plantId, coverPath),
                                           builder: (context, snapshot) {
                                             if (snapshot.hasData) {
                                               plantCoverPath = snapshot.data!;
@@ -230,14 +222,12 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                 width: 120,
                                                 height: 120,
                                                 decoration: BoxDecoration(
-                                                  borderRadius:
-                                                  BorderRadius.circular(
+                                                  borderRadius: BorderRadius.circular(
                                                     10,
                                                   ),
                                                   image: DecorationImage(
                                                     fit: BoxFit.cover,
-                                                    image: NetworkImage(
-                                                        plantCoverPath ?? ''),
+                                                    image: NetworkImage(plantCoverPath ?? ''),
                                                   ),
                                                 ),
                                               );
@@ -251,50 +241,39 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           width: 10,
                                         ),
                                         FutureBuilder<List<String>>(
-                                            future: plantVM.fetchPlantGallery(
-                                                plantId),
+                                            future: plantVM.fetchPlantGallery(plantId),
                                             builder: (context, snapshot) {
                                               if (!snapshot.hasData) {
                                                 return SizedBox.shrink();
                                               }
 
                                               if (snapshot.hasData) {
-                                                plantGalleryPaths =
-                                                snapshot.data!;
+                                                plantGalleryPaths = snapshot.data!;
                                                 return Wrap(
-                                                  alignment: WrapAlignment
-                                                      .spaceBetween,
+                                                  alignment: WrapAlignment.spaceBetween,
                                                   children: plantGalleryPaths
                                                       .map(
                                                         (e) => Row(
-                                                      children: [
-                                                        Container(
-                                                          width: 120,
-                                                          height: 120,
-                                                          decoration:
-                                                          BoxDecoration(
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                              10,
+                                                          children: [
+                                                            Container(
+                                                              width: 120,
+                                                              height: 120,
+                                                              decoration: BoxDecoration(
+                                                                borderRadius: BorderRadius.circular(
+                                                                  10,
+                                                                ),
+                                                                image: DecorationImage(
+                                                                  fit: BoxFit.cover,
+                                                                  image: NetworkImage(e ?? ''),
+                                                                ),
+                                                              ),
                                                             ),
-                                                            image:
-                                                            DecorationImage(
-                                                              fit: BoxFit
-                                                                  .cover,
-                                                              image:
-                                                              NetworkImage(
-                                                                  e ??
-                                                                      ''),
+                                                            SizedBox(
+                                                              width: 10,
                                                             ),
-                                                          ),
+                                                          ],
                                                         ),
-                                                        SizedBox(
-                                                          width: 10,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  )
+                                                      )
                                                       .toList(),
                                                 );
                                               }
@@ -396,22 +375,16 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                     child: Padding(
                                       padding: const EdgeInsets.all(5.0),
                                       child: Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Align(
-                                                  alignment:
-                                                  Alignment.centerLeft,
+                                                  alignment: Alignment.centerLeft,
                                                   child: Text(
                                                     "Plant Type: ",
                                                     style: TextStyle(
@@ -421,9 +394,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -431,8 +402,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 17,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -444,12 +414,9 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Text(
                                                   "Lifespan: ",
@@ -459,9 +426,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -469,8 +434,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 17,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -482,12 +446,9 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Text(
                                                   "Bloom Time: ",
@@ -497,9 +458,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -507,8 +466,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 17,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -520,12 +478,9 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ),
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Text(
                                                   "Habitat: ",
@@ -535,9 +490,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -545,8 +498,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 17,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -600,20 +552,14 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                     child: Padding(
                                       padding: const EdgeInsets.all(5.0),
                                       child: Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Difficulty: ",
@@ -623,9 +569,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -633,8 +577,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -646,14 +589,10 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Sunlight: ",
@@ -663,9 +602,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -673,8 +610,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -686,14 +622,10 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Soil: ",
@@ -703,9 +635,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -713,8 +643,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -726,14 +655,10 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Water: ",
@@ -743,9 +668,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -753,8 +676,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -766,14 +688,10 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Fertilize: ",
@@ -783,9 +701,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -793,8 +709,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -806,14 +721,10 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Planting Time: ",
@@ -823,19 +734,15 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
-                                                      plantModel[
-                                                      'plantingTime'],
+                                                      plantModel['plantingTime'],
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -847,14 +754,10 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Harvest Time: ",
@@ -864,9 +767,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -874,8 +775,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
@@ -887,14 +787,10 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                           ), //spacing
 
                                           Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                8, 0, 8, 0),
+                                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                             child: Row(
-                                              mainAxisAlignment:
-                                              MainAxisAlignment
-                                                  .spaceBetween,
-                                              crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   "Disease: ",
@@ -904,9 +800,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                   ),
                                                 ),
                                                 Padding(
-                                                  padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      8, 0, 8, 0),
+                                                  padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                                                   child: Container(
                                                     width: 200,
                                                     child: Text(
@@ -914,8 +808,7 @@ class _UserPlantGuideDetailsState extends State<UserPlantGuideDetails> {
                                                       style: TextStyle(
                                                         fontSize: 15,
                                                       ),
-                                                      textAlign:
-                                                      TextAlign.justify,
+                                                      textAlign: TextAlign.justify,
                                                     ),
                                                   ),
                                                 ),
