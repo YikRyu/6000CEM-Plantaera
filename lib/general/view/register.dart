@@ -68,7 +68,8 @@ class _RegisterState extends State<Register> {
     }
     else{
       setState(() {
-        registerStatusText = "Please enter password with at least 8 characters, 1 upper and lower case, 1 number, and 1 special character(!@#\$&*~).";
+         registerStatusText = "Please enter password with at least 8 characters, "
+            "1 upper and lower case, 1 number, and 1 special character(!@#\$&*~).";
         _loading = false; //for the loading progress bar
       });
       return;

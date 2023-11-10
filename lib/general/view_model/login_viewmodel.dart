@@ -11,7 +11,8 @@ class LoginVM{
         password: password,
       );
       //grab and check for user role
-      Map<String, dynamic> userRole = await getUserInformation(FirebaseAuth.instance.currentUser!.uid);
+      Map<String, dynamic> userRole = await
+      getUserInformation(FirebaseAuth.instance.currentUser!.uid);
       if(userRole["role"] == 'user'){
         return "user";
       }else{

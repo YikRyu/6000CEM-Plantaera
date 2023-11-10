@@ -299,7 +299,6 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
 
                             Container(
                               width: double.infinity,
-                              height: 200,
                               decoration: BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
@@ -341,6 +340,7 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 15,),
                                 ],
                               ),
                             ), //symptoms container
@@ -350,7 +350,6 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
 
                             Container(
                               width: double.infinity,
-                              height: 200,
                               decoration: BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
@@ -392,6 +391,7 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 15,),
                                 ],
                               ),
                             ), //causes container
@@ -401,7 +401,6 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
 
                             Container(
                               width: double.infinity,
-                              height: 200,
                               decoration: BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
@@ -443,6 +442,7 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 15,),
                                 ],
                               ),
                             ), //solutions container
@@ -452,7 +452,6 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
 
                             Container(
                               width: double.infinity,
-                              height: 200,
                               decoration: BoxDecoration(
                                 border: Border(
                                   top: BorderSide(
@@ -494,6 +493,7 @@ class _UserDiseaseGuideDetailsState extends State<UserDiseaseGuideDetails> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 15,),
                                 ],
                               ),
                             ), //preventions container
